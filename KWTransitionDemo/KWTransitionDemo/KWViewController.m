@@ -10,7 +10,7 @@
 #import "KWTransition.h"
 #import "KWModalViewController.h"
 
-@interface KWViewController ()
+@interface KWViewController ()<UINavigationControllerDelegate>
 
 @property (nonatomic, strong) NSArray *transitions;
 @property (nonatomic, strong) KWTransition *transition;
@@ -24,8 +24,8 @@
 	
 	[self setTitle:@"KWTransition Demo"];
 	[self setModalPresentationStyle: UIModalPresentationCustom];
-	
-	_transition = [KWTransition manager];
+    [self.navigationController setDelegate:self];
+    _transition = [KWTransition manager];
 	_transitions = @[
 		@{
 			@"name" : @"KWTransitionStyleFadeBackOver",
@@ -105,7 +105,8 @@
 	
 	KWModalViewController *VC = [[KWModalViewController alloc] init];
 	VC.transitioningDelegate = self;
-	[self presentViewController:VC animated:YES completion:nil];
+	[self.navigationController pushViewController:VC animated:YES];
+//	[self presentViewController:VC animated:YES completion:nil];
 }
 
 #pragma mark - UIVieControllerTransitioningDelegate -
@@ -120,6 +121,17 @@
 - (id<UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {
 	self.transition.action = KWTransitionStepDismiss;
 	return self.transition;
+}
+
+- (id <UIViewControllerAnimatedTransitioning>)navigationController:(UINavigationController *)navigationController animationControllerForOperation:(UINavigationControllerOperation)operation fromViewController:(UIViewController *)fromVC toViewController:(UIViewController *)toVC {
+    if (operation==UINavigationControllerOperationPush)
+    {
+        self.transition.action=KWTransitionStepPresent;
+    }else
+    {
+        self.transition.action=KWTransitionStepDismiss;
+    }
+    return self.transition;
 }
 
 @end
